@@ -1,1 +1,2 @@
-# WeatherDashboard
+Weather Dashboard Homework 6
+

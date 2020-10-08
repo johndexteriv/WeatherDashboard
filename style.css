@@ -1,0 +1,17 @@
+header {
+    text-align: center;
+    color: floralwhite;
+    background-color: rgb(26, 29, 29);
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+body {
+    background-color: rgb(216, 206, 206);
+}
+
+.lowerCard{
+    margin: 0 auto;
+    float: none;
+    margin-bottom: 10px;
+}
