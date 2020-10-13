@@ -14,4 +14,18 @@ body {
     margin: 0 auto;
     float: none;
     margin-bottom: 10px;
+    width: 143px;
+    height: 200px;
+}
+
+.favorable {
+    background-color: green;
+}
+
+.moderate {
+    background-color: yellow;
+}
+
+.severe{
+    background-color: red;
 }
