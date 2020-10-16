@@ -29,3 +29,15 @@ body {
 .severe{
     background-color: red;
 }
+
+.list-group-item {
+    cursor: pointer;
+}
+
+.uVBtn{
+    font-size: 15px;
+}
+.removebutton {
+font-size: 10px;
+float: right;
+}

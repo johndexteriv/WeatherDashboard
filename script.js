@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-    
+    // If if no savedCities list, set to empty array
     if (!localStorage.getItem("savedCitiesList")){
         localStorage.setItem('savedCitiesList', JSON.stringify([]));
     }
@@ -17,61 +17,63 @@ $( document ).ready(function() {
         $('.card-body').empty();
     }
 
-    
     // Empty array variable to .unshift city names into
     var savedCitiesList = [];
-
+    // Function to query current weather conditions based on cityName value
     function currentLocationWeather(cityName){
-
         console.log('the city name being run is', cityName)
     
         var apiKey = "&appid=166a433c57516f51dfab1f7edaed8413"
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + apiKey;
-
+        // Ajax call for current weather conditions
         $.ajax({
             url: queryURL,
             method: "GET",
         }).then(function(response){
-            // console.log('this is the reponse', response);
-
+            // H1 of cityName with current date formatted from moment.js
             $('.city-name').html('<h1>' + response.name + " " + "(" + moment().format('L') + ")" + '</h1>');
+            // Building weather icon to append
             var weatherIcon = $('<img>');
             var iconSrc = 'http://openweathermap.org/img/wn/' + response.weather[0].icon + '.png';
             weatherIcon.attr('src', iconSrc);
             weatherIcon.appendTo('.currentWeatherIcon');
+            // Conversion from kelvin to fahrenheit
             var tempF = (response.main.temp - 273.15) * 1.80 +32
             $('.tempDiv').text("Temperature: " + tempF.toFixed(2) + " *F");
+            // Setting humidity and wind speed
             $('.humidityDiv').text("Humidity: " + response.main.humidity + " %");
             $('.windDiv').text("Wind Speed: " + response.wind.speed + " MPH")
-
-            // display current weather info 
+            // Building variables in order query for uvIndex
             var long = response.coord.lon
             var lat = response.coord.lat
-            // console.log('longitude', long)
-            // console.log('lat', lat);
+            // Running uvIndex and fiveDay functions
             uvIndex(lat, long);
             fiveDay(cityName);
-
-            // Create another call for five day forecast
-            
         })
 
     }
     // UV index function
     function uvIndex(lat, long){
-
+        // queryURL developed with lat and long variables
         var apiKey = "&appid=166a433c57516f51dfab1f7edaed8413"
         var queryURL = "http://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + long + apiKey;
-
+        // Ajax call
         $.ajax({
             url: queryURL,
             method: "GET",
         }).then(function(response){
             console.log('this is the reponse', response);
-            $('.uvDiv').text("UV Index: " + response.value);
-            
+            // UV index with button element built on
+            $('.uvDiv').html("UV Index: " + '<button class= uVBtn>' + response.value + '</button>');
+            // Setting background-color based off UV Index severity
+            if (response.value >= 6){
+                $('.uVBtn').css("background-color", "red")
+            } else if (response.value >= 3){
+                $('.uVBtn').css("background-color", "yellow")
+            } else {
+                $('.uVBtn').css("background-color", "green")
+            }
         })
-
     }
     // fiveDay forecast function
     function fiveDay(cityName){
@@ -128,10 +130,7 @@ $( document ).ready(function() {
             var dayFiveTemp = (response.list[37].main.temp - 273.15) * 1.80 +32
             var dayFiveTempP = $('<p>' + ("Temp: " + dayFiveTemp.toFixed(2) + "*F") + '</p>');
             var dayFiveHumidity = $('<p>' + ("Humidity: " + response.list[37].main.humidity + "%") + '</p>')
-            $('.dayfive').append(dayFiveHeader, weatherIconFive, dayFiveTempP, dayFiveHumidity);
-
-
-            
+            $('.dayfive').append(dayFiveHeader, weatherIconFive, dayFiveTempP, dayFiveHumidity);  
         })
 
     };
@@ -139,7 +138,6 @@ $( document ).ready(function() {
 
     // On click function to add #search-city val to savedCitiesList and append to #city-list
     $('.btn-primary').on('click', function(event){
-        
         
         // Prevents Default
         event.preventDefault();
@@ -157,6 +155,11 @@ $( document ).ready(function() {
         // Creates a li for cityName and adds class of 'list-group-item'
         var cityLi = $('<li>' + cityName + '</li>')
         cityLi.addClass('list-group-item')
+        cityLi.attr("value", cityName)
+        var cityButton = $('<button>' + 'Remove' + '</button>')
+        cityButton.addClass('removebutton')
+        
+        cityLi.append(cityButton);
         //prepends cityLi to #city-list div
         $('#city-list').prepend(cityLi);
         // console.log('list item being prepended', cityName);
@@ -164,42 +167,54 @@ $( document ).ready(function() {
         $('.form-inline')[0].reset();
         // Calls currentLocationWeather and passes cityName through it
         currentLocationWeather(cityName);
-        
-
-
     })
 
+    $(document).on("click", ".removebutton", function(event){
+        if(event.target.matches('.removebutton')){
+
+            var savedCitiesList = localStorage.getItem('savedCitiesList')
+            console.log(savedCitiesList)
+            savedCitiesList = JSON.parse(savedCitiesList);
+            var indexOf = $(this).parent().index()
+            // var removedLi = $(this).parent()
+            console.log(indexOf);
+            console.log(removedLi)
+            savedCitiesList.splice(indexOf, 1);
+            localStorage.setItem('savedCitiesList', JSON.stringify(savedCitiesList));
+
+            var removedLi = $(this).parent()
+            removedLi.remove();
+            clear();
+            
+            
+            
+        }
+    })
+
+    $(document).on("click", ".list-group-item", function(event){
+
+        console.log('event taking place', $(this).attr("value"))
+        clear();
+        var value = $(this).attr("value")
+        currentLocationWeather(value);
+    })
 
 
     function renderList(){
         var citiesListParse = JSON.parse(localStorage.getItem('savedCitiesList'));
-        // console.log('cities list parsed', citiesListParse)
 
         for(i = 0; i < citiesListParse.length; i++){
             var singleCityLi = $('<li>' + citiesListParse[i] + '</li>')
             singleCityLi.addClass('list-group-item')
+            singleCityLi.attr("value", citiesListParse[i])
+            var cityButton = $('<button>' + 'Remove' + '</button>')
+            cityButton.addClass('removebutton')
+            singleCityLi.append(cityButton)
             $('#city-list').append(singleCityLi);
+            
         }
-
-        $('.list-group-item').on("click", function(event){
-            if(event.target.matches('.list-group-item')){
-            var savedCitiesList = localStorage.getItem('savedCitiesList');
-            savedCitiesList = JSON.parse(savedCitiesList);
-            var cityName = $(this).val(savedCitiesList)
-
-            console.log('this is a clicked list item', cityName)
-            }
-        })
-
-        var firstCity = citiesListParse[0]
-        // console.log('the first city is', firstCity);
     }
-
 
     currentLocationWeather(defaultCity);
     renderList();
-
-
-
-
 });
