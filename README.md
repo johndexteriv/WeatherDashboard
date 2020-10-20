@@ -33,5 +33,8 @@ When I click on a city in the search history
 When I open the weather dashboard
 - I am presented with the last searched city forecast
 
+Additional feature added:
+- Remove buttons to recently searched cities in UL
+
 https://johndexteriv.github.io/WeatherDashboard/
 ![Weather ScreenShot](weatherdash.png)
